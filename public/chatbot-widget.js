@@ -25,19 +25,30 @@
   let deviceId = localStorage.getItem('chatbot_deviceId') || 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
   localStorage.setItem('chatbot_deviceId', deviceId);
 
-  // Fetch chatbot data
+  // Create widget immediately (don't wait for API)
+  createWidget();
+
+  // Fetch chatbot data in background and update widget
   fetch(`${apiUrl}/chatbots/${chatbotId}`)
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) throw new Error('Failed to fetch chatbot');
+      return res.json();
+    })
     .then(data => {
       chatbot = data;
-      createWidget();
+      updateWidgetWithChatbotData();
     })
     .catch(err => {
       console.error('Error loading chatbot:', err);
-      createWidget(); // Create widget anyway with default config
+      // Widget already created, continue with default config
     });
 
   function createWidget() {
+    // Check if widget already exists
+    if (document.getElementById('chatbot-widget')) {
+      return; // Widget already created
+    }
+
     // Create widget container
     const widget = document.createElement('div');
     widget.id = 'chatbot-widget';
@@ -49,12 +60,10 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     `;
 
-    // Create toggle button
+    // Create toggle button (show immediately with default style)
     const toggleBtn = document.createElement('button');
     toggleBtn.id = 'chatbot-toggle';
-    toggleBtn.innerHTML = chatbot?.iconImage 
-      ? `<img src="${chatbot.iconImage}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;" />`
-      : `<div style="width: 60px; height: 60px; border-radius: 50%; background: ${chatbot?.primaryColor || '#3B82F6'}; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;">${chatbot?.icon || '💬'}</div>`;
+    toggleBtn.innerHTML = `<div style="width: 60px; height: 60px; border-radius: 50%; background: #3B82F6; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;">💬</div>`;
     toggleBtn.style.cssText = `
       width: 60px;
       height: 60px;
@@ -63,6 +72,8 @@
       cursor: pointer;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       transition: transform 0.2s;
+      padding: 0;
+      background: transparent;
     `;
     toggleBtn.onmouseover = () => toggleBtn.style.transform = 'scale(1.1)';
     toggleBtn.onmouseout = () => toggleBtn.style.transform = 'scale(1)';
@@ -168,8 +179,45 @@
 
     document.body.appendChild(widget);
 
-    // Show welcome message
+    // Show welcome message if chatbot data is available
     if (chatbot?.welcomeMessage) {
+      addMessage('bot', chatbot.welcomeMessage);
+    }
+  }
+
+  function updateWidgetWithChatbotData() {
+    if (!chatbot) return;
+    
+    // Update toggle button with chatbot icon/color
+    const toggleBtn = document.getElementById('chatbot-toggle');
+    if (toggleBtn) {
+      toggleBtn.innerHTML = chatbot.iconImage 
+        ? `<img src="${chatbot.iconImage}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;" />`
+        : `<div style="width: 60px; height: 60px; border-radius: 50%; background: ${chatbot.primaryColor || '#3B82F6'}; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;">${chatbot.icon || '💬'}</div>`;
+    }
+
+    // Update chat window header
+    const header = document.querySelector('#chatbot-window > div:first-child');
+    if (header) {
+      const headerContent = header.querySelector('div:first-child');
+      if (headerContent) {
+        headerContent.innerHTML = `
+          <div style="font-weight: 600; font-size: 16px;">${chatbot.name || 'Chatbot'}</div>
+          <div style="font-size: 12px; opacity: 0.9;">Online</div>
+        `;
+      }
+      header.style.background = chatbot.primaryColor || '#3B82F6';
+    }
+
+    // Update send button color
+    const sendBtn = document.querySelector('#chatbot-window button:last-of-type');
+    if (sendBtn) {
+      sendBtn.style.background = chatbot.primaryColor || '#3B82F6';
+    }
+
+    // Show welcome message if not already shown
+    const messagesContainer = document.getElementById('chatbot-messages');
+    if (messagesContainer && messagesContainer.children.length === 0 && chatbot.welcomeMessage) {
       addMessage('bot', chatbot.welcomeMessage);
     }
   }
@@ -260,7 +308,11 @@
 
   // Initialize when DOM is ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {});
+    document.addEventListener('DOMContentLoaded', () => {
+      // DOM is ready, widget creation already triggered above
+    });
+  } else {
+    // DOM already loaded, widget creation already triggered above
   }
 })();
 
