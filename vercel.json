@@ -7,6 +7,10 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/chatbot-widget.js",
+      "destination": "/chatbot-widget.js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
@@ -26,11 +30,15 @@
       "headers": [
         {
           "key": "Content-Type",
-          "value": "application/javascript"
+          "value": "application/javascript; charset=utf-8"
         },
         {
           "key": "Cache-Control",
           "value": "public, max-age=3600"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
         }
       ]
     }
