@@ -72,7 +72,7 @@ const Dashboard = () => {
       background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 20%, #334155 40%, #475569 60%, #64748b 80%, #0f172a 100%)',
       backgroundSize: '400% 400%'
     }}>
-      {/* Animated Main Gradient */}
+      {/* Animated Main  Gradient */}
       <div 
         className="absolute inset-0 animate-gradient-x opacity-100"
         style={{ 
