@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Save, Eye, Upload, X, Copy, Check } from 'lucide-react'
-import axios from 'axios'
+import api, { axios } from '../utils/api'
 import ChatbotWidget from './ChatbotWidget'
 
 const CreateChatbot = () => {
@@ -63,7 +63,7 @@ const CreateChatbot = () => {
     formDataUpload.append('icon', file)
 
     try {
-      const response = await axios.post('/api/upload/icon', formDataUpload, {
+      const response = await api.post('/upload/icon', formDataUpload, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -93,7 +93,7 @@ const CreateChatbot = () => {
         knowledgeSource: ''
       }
       console.log('Submitting payload:', payload)
-      const response = await axios.post('/api/chatbots', payload)
+      const response = await api.post('/chatbots', payload)
       console.log('Chatbot created:', response.data)
       setCreatedChatbot(response.data)
       // Automatically move to installation step to show script

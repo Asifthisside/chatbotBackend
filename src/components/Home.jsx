@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Bot, MessageSquare, TrendingUp, Users, ArrowRight, BarChart3, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import api, { axios } from '../utils/api'
 import { useLanguage } from '../contexts/LanguageContext'
 import Modal from './Modal'
 
@@ -34,7 +34,7 @@ const Home = () => {
   const fetchApiInfo = async () => {
     try {
       // Get API base URL from environment or use default
-      const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+      const apiBaseUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://chatbot-xi-six-89.vercel.app/api' : 'http://localhost:5000/api')
       const baseUrl = apiBaseUrl.replace('/api', '')
       const response = await axios.get(`${baseUrl}/`)
       setApiInfo(response.data)
@@ -253,7 +253,7 @@ const Home = () => {
                 className="p-3 rounded-lg border transition-all duration-200 hover:scale-105 cursor-pointer"
                 style={{ background: 'rgba(17, 24, 39, 0.6)', borderColor: 'rgba(107, 114, 128, 0.3)' }}
                 onClick={() => {
-                  const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+                  const apiBaseUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://chatbot-xi-six-89.vercel.app/api' : 'http://localhost:5000/api')
                   const baseUrl = apiBaseUrl.replace('/api', '')
                   window.open(`${baseUrl}${endpoint}`, '_blank')
                 }}

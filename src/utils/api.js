@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { showError } from '../components/ErrorToast'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://chatbot-xi-six-89.vercel.app/api' : 'http://localhost:5000/api')
 
 // Error handler function
 const handleError = (error) => {
@@ -101,9 +101,8 @@ api.interceptors.response.use(
 
 // Also configure default axios instance for components using axios directly
 // Set default baseURL for relative API calls
-if (API_BASE_URL && !API_BASE_URL.includes('localhost')) {
-  axios.defaults.baseURL = API_BASE_URL.replace('/api', '')
-}
+// Always set baseURL to ensure API calls go to the correct backend
+axios.defaults.baseURL = API_BASE_URL.replace('/api', '')
 
 // Add interceptors to default axios instance
 axios.interceptors.response.use(
