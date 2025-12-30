@@ -108,9 +108,24 @@ const ChatbotWidget = ({ chatbot, messages = [], onSendMessage, inputMessage, se
       setSending(false)
       
       // Show error message to user
+      // Extract error message safely (handle both string and object formats)
+      let errorText = 'Sorry, there was an error sending your message. Please try again.'
+      if (error.response?.data) {
+        const errorData = error.response.data
+        if (typeof errorData.error === 'string') {
+          errorText = errorData.error
+        } else if (errorData.error?.message) {
+          errorText = errorData.error.message
+        } else if (typeof errorData.message === 'string') {
+          errorText = errorData.message
+        } else if (errorData.message?.message) {
+          errorText = errorData.message.message
+        }
+      }
+      
       const errorMessage = {
         type: 'bot',
-        text: error.response?.data?.error || 'Sorry, there was an error sending your message. Please try again.',
+        text: errorText,
         timestamp: new Date(),
         isError: true
       }

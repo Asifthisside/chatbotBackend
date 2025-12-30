@@ -101,7 +101,22 @@ const CreateChatbot = () => {
     } catch (error) {
       console.error('Error creating chatbot:', error)
       console.error('Error response:', error.response?.data)
-      const errorMessage = error.response?.data?.error || error.message || 'Failed to create chatbot'
+      // Extract error message safely (handle both string and object formats)
+      let errorMessage = 'Failed to create chatbot'
+      if (error.response?.data) {
+        const errorData = error.response.data
+        if (typeof errorData.error === 'string') {
+          errorMessage = errorData.error
+        } else if (errorData.error?.message) {
+          errorMessage = errorData.error.message
+        } else if (typeof errorData.message === 'string') {
+          errorMessage = errorData.message
+        } else if (errorData.message?.message) {
+          errorMessage = errorData.message.message
+        }
+      } else if (error.message) {
+        errorMessage = error.message
+      }
       alert(`Failed to create chatbot: ${errorMessage}`)
     } finally {
       setLoading(false)

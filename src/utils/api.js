@@ -3,14 +3,46 @@ import { showError } from '../components/ErrorToast'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://chatbot-xi-six-89.vercel.app/api' : 'http://localhost:5000/api')
 
-// Log API configuration on load (helpful for debugging)
-if (typeof window !== 'undefined') {
+// Log API configuration on load (only in development)
+if (typeof window !== 'undefined' && import.meta.env.DEV) {
   console.log('API Configuration:', {
     VITE_API_URL: import.meta.env.VITE_API_URL,
     PROD: import.meta.env.PROD,
     API_BASE_URL: API_BASE_URL,
     'Using default': !import.meta.env.VITE_API_URL
   })
+}
+
+// Helper function to extract error message from various formats
+const extractErrorMessage = (errorData) => {
+  if (!errorData) return 'An error occurred'
+  
+  // If it's already a string, return it
+  if (typeof errorData === 'string') {
+    return errorData
+  }
+  
+  // If error is an object with message property
+  if (errorData.error && typeof errorData.error === 'string') {
+    return errorData.error
+  }
+  
+  // If error is an object (like {code, message}), extract message
+  if (errorData.error && typeof errorData.error === 'object' && errorData.error.message) {
+    return errorData.error.message
+  }
+  
+  // If message property exists
+  if (errorData.message && typeof errorData.message === 'string') {
+    return errorData.message
+  }
+  
+  // If message is an object, try to extract from it
+  if (errorData.message && typeof errorData.message === 'object' && errorData.message.message) {
+    return errorData.message.message
+  }
+  
+  return null
 }
 
 // Error handler function
@@ -21,16 +53,10 @@ const handleError = (error) => {
     const status = error.response.status
     const errorData = error.response.data
     
-    let errorMessage = 'An error occurred'
+    let errorMessage = extractErrorMessage(errorData)
     
-    if (errorData?.error) {
-      errorMessage = errorData.error
-    } else if (errorData?.message) {
-      errorMessage = errorData.message
-    } else if (typeof errorData === 'string') {
-      errorMessage = errorData
-    } else {
-      // Default messages based on status code
+    // If we couldn't extract a message, use defaults based on status code
+    if (!errorMessage) {
       switch (status) {
         case 400:
           errorMessage = 'Bad Request: Invalid data provided'
@@ -45,7 +71,7 @@ const handleError = (error) => {
           errorMessage = 'Not Found: The requested resource was not found'
           break
         case 500:
-          errorMessage = errorData?.error || errorData?.message || 'Server Error: Something went wrong on the server'
+          errorMessage = 'Server Error: Something went wrong on the server'
           break
         case 502:
           errorMessage = 'Bad Gateway: Server is temporarily unavailable'
@@ -54,8 +80,13 @@ const handleError = (error) => {
           errorMessage = 'Service Unavailable: Server is under maintenance'
           break
         default:
-          errorMessage = `Error ${status}: ${errorData?.message || 'An error occurred'}`
+          errorMessage = `Error ${status}: An error occurred`
       }
+    }
+    
+    // Ensure errorMessage is always a string
+    if (typeof errorMessage !== 'string') {
+      errorMessage = String(errorMessage)
     }
     
     // Show error toast
