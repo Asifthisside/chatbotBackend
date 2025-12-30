@@ -113,9 +113,9 @@ const CreateChatbot = () => {
     const chatbotId = createdChatbot._id
     const position = createdChatbot.position === 'Bottom Left' ? 'left' : 'right'
     
-    // Use environment variables or fallback to current origin
-    const frontendUrl = import.meta.env.VITE_FRONTEND_URL || window.location.origin
-    const apiUrl = import.meta.env.VITE_API_URL || `${window.location.origin.replace(':3000', ':5000')}/api`
+    // Use environment variables or fallback to production URLs
+    const frontendUrl = import.meta.env.VITE_FRONTEND_URL || (import.meta.env.PROD ? 'https://chatbot-backend-seven-sage.vercel.app' : window.location.origin)
+    const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://chatbot-xi-six-89.vercel.app/api' : 'http://localhost:5000/api')
     
     // Widget URL - use frontend URL
     const widgetUrl = `${frontendUrl}/chatbot-widget.js`
