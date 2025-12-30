@@ -3,6 +3,16 @@ import { showError } from '../components/ErrorToast'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://chatbot-xi-six-89.vercel.app/api' : 'http://localhost:5000/api')
 
+// Log API configuration on load (helpful for debugging)
+if (typeof window !== 'undefined') {
+  console.log('API Configuration:', {
+    VITE_API_URL: import.meta.env.VITE_API_URL,
+    PROD: import.meta.env.PROD,
+    API_BASE_URL: API_BASE_URL,
+    'Using default': !import.meta.env.VITE_API_URL
+  })
+}
+
 // Error handler function
 const handleError = (error) => {
   // Handle error response
@@ -59,9 +69,18 @@ const handleError = (error) => {
     })
   } else if (error.request) {
     // Request was made but no response received
-    const errorMessage = 'Network Error: Unable to connect to server. Please check your internet connection.'
+    const requestedURL = error.config?.baseURL 
+      ? `${error.config.baseURL}${error.config.url || ''}` 
+      : error.config?.url || 'Unknown URL'
+    const errorMessage = `Network Error: Unable to connect to server at ${requestedURL}. Please check your internet connection and verify the backend URL is correct.`
     showError(errorMessage, 'error')
-    console.error('Network Error:', error.request)
+    console.error('Network Error Details:', {
+      message: error.message,
+      request: error.request,
+      config: error.config,
+      requestedURL: requestedURL,
+      apiBaseURL: API_BASE_URL
+    })
   } else {
     // Something else happened
     const errorMessage = error.message || 'An unexpected error occurred'
@@ -81,6 +100,15 @@ const api = axios.create({
 // Request interceptor for api instance
 api.interceptors.request.use(
   (config) => {
+    // Log API requests in development
+    if (import.meta.env.DEV) {
+      console.log('API Request:', {
+        method: config.method?.toUpperCase(),
+        url: config.url,
+        baseURL: config.baseURL,
+        fullURL: `${config.baseURL}${config.url}`
+      })
+    }
     return config
   },
   (error) => {
