@@ -7,11 +7,7 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/chatbot-widget.js",
-      "destination": "/chatbot-widget.js"
-    },
-    {
-      "source": "/(.*)",
+      "source": "/((?!.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|json|xml|txt|pdf|mp4|webm|ogg|webp|avif|wasm)|assets/).*)",
       "destination": "/index.html"
     }
   ],
